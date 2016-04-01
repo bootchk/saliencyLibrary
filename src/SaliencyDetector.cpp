@@ -6,24 +6,24 @@
 #include <ctime>
 #include <cmath>
 
-#include "Gradienter.h"
 #include "SaliencyDetector.h"
+#include "Gradienter.h"
+#include "Smoother.h"
 
 
 namespace sal {
 
 
-void SaliencyDetector::postProcessSaliencyMap(cv::Mat1f& salMap, const float& sigma){
-	Gradienter gradienter(sigma);
+void SaliencyDetector::postProcessSaliencyMap(cv::Mat1f& salMap, const float& sigma)
+{
+	Smoother smoother(sigma);
+
 	cv::Mat1f filteredMap;
 
 	double minV = 1, maxV = 1;
 	cv::minMaxLoc(salMap, &minV, &maxV);
 
-	/*
-	 * First smoothing operation
-	 */
-	gradienter.smoothImage(salMap, filteredMap);
+	smoother.smoothImage(salMap, filteredMap);
 	filteredMap.copyTo(salMap);
 
 	/*
@@ -31,8 +31,8 @@ void SaliencyDetector::postProcessSaliencyMap(cv::Mat1f& salMap, const float& si
 	 * unsightly rings caused by the Gaussian
 	 */
 	filteredMap.release();
-	gradienter.setSigma(0.6f * sigma);
-	gradienter.smoothImage(salMap, filteredMap);
+	smoother.setSigma(0.6f * sigma);
+	smoother.smoothImage(salMap, filteredMap);
 	filteredMap.copyTo(salMap);
 
 	//  Normalization
