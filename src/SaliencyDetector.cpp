@@ -5,19 +5,16 @@
 #include <cassert>
 #include <ctime>
 #include <cmath>
-#include "CannyEdgeDetector.h"
+
+#include "Gradienter.h"
 #include "SaliencyDetector.h"
 
 
 namespace sal {
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-/// Abstract class SaliencyDetector Methods
-//////////////////////////////////////////////////////////////////////////////////////////
-
 void SaliencyDetector::postProcessSaliencyMap(cv::Mat1f& salMap, const float& sigma){
-	CannyEdgeDetector canny(sigma);
+	Gradienter gradienter(sigma);
 	cv::Mat1f filteredMap;
 
 	double minV = 1, maxV = 1;
@@ -26,7 +23,7 @@ void SaliencyDetector::postProcessSaliencyMap(cv::Mat1f& salMap, const float& si
 	/*
 	 * First smoothing operation
 	 */
-	canny.smoothImage(salMap, filteredMap);
+	gradienter.smoothImage(salMap, filteredMap);
 	filteredMap.copyTo(salMap);
 
 	/*
@@ -34,8 +31,8 @@ void SaliencyDetector::postProcessSaliencyMap(cv::Mat1f& salMap, const float& si
 	 * unsightly rings caused by the Gaussian
 	 */
 	filteredMap.release();
-	canny.setSigma(0.6f * sigma);
-	canny.smoothImage(salMap, filteredMap);
+	gradienter.setSigma(0.6f * sigma);
+	gradienter.smoothImage(salMap, filteredMap);
 	filteredMap.copyTo(salMap);
 
 	//  Normalization
@@ -373,13 +370,12 @@ void ImageSaliencyDetector::compute() {
 
 	srand(time(NULL));
 
-	// Get edge information
-	CannyEdgeDetector canny;
-	canny.compute(srcImage);
-	setMagnitudes(canny.getGradMagnitudes());
-	setOrientations(canny.getGradOrientations());
+	// Get gradient information
+	Gradienter gradienter;
+	gradienter.compute(srcImage);
+	setMagnitudes(gradienter.getGradMagnitudes());
+	setOrientations(gradienter.getGradOrientations());
 
-	// Quantize magnitudes
 	quantizeMagnitudes();
 
 	// Perform iterative saliency detection mechanism
