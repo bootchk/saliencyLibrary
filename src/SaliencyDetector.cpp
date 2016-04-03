@@ -378,6 +378,8 @@ void ImageSaliencyDetector::compute() {
 
 	quantizeMagnitudes();
 
+	std::cout << "Iterating on samples.\n";
+
 	// Perform iterative saliency detection mechanism
 	int squaredNHood = neighborhoodSize * neighborhoodSize;
 	int halfNHood = neighborhoodSize / 2;
